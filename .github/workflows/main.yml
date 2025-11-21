@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   test-retrieve:
-    runs-on: [ self-hosted ]
+    runs-on: [ ubuntu-latest ]
     steps:
       - name: Retrieve Secrets
         env:
