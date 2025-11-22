@@ -35,7 +35,8 @@ jobs:
           GIT_TOKEN=$(curl -s -H "Authorization:bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -r .value)
 
           echo "Authenticating to Conjur"
-          AUTH_URL="$CONJUR_URL/authn-jwt/$CONJUR_SERVICE_ID/$CONJUR_ACCOUNT/$CONJUR_HOST_ID/authenticate"
+          #AUTH_URL="$CONJUR_URL/authn-jwt/$CONJUR_SERVICE_ID/$CONJUR_ACCOUNT/$CONJUR_HOST_ID/authenticate"
+          AUTH_URL="$CONJUR_URL/authn-jwt/$CONJUR_SERVICE_ID/$CONJUR_ACCOUNT/authenticate"
           curl -sD - -X POST "$AUTH_URL" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Encoding: base64" -d "jwt=$GIT_TOKEN"
           SESSION_TOKEN=$(curl -sX POST "$AUTH_URL" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Encoding: base64" --data-urlencode "jwt=$GIT_TOKEN")
           render "$SESSION_TOKEN"
