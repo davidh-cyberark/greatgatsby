@@ -1,4 +1,4 @@
-name: Conjur Demo
+name: release
 
 # Watch Policy branch
 on:
