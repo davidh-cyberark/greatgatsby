@@ -20,26 +20,17 @@ jobs:
           CONJUR_ACCOUNT: "conjur"
           CONJUR_SERVICE_ID: "github"
           SECRET_ID: "data%2Fvault%2Fasbdemo-azure-safe%2Fvm1%2Fpassword"
-          CONJUR_HOST_ID: "host%2Fdata%2Fgithub-apps%2Frelease"
         run: |
           set -x
           render () { echo -n "$1" | while IFS= read -r -n1 char; do printf "One Character: %s\n" "$char"; done }
-
-          X_CONJUR_URL="https://asb-pov.secretsmgr.cyberark.cloud/api"
-          X_CONJUR_ACCOUNT="conjur"
-          X_CONJUR_SERVICE_ID="github"
-          X_SECRET_ID="data%2Fvault%2Fasbdemo-azure-safe%2Fvm1%2Fpassword"
-          X_CONJUR_HOST_ID="host%2Fdata%2Fgithub-apps%2Frelease"
 
           echo "Retrieving JWT Token from Github"
           GIT_TOKEN=$(curl -s -H "Authorization:bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -r .value)
 
           echo "Authenticating to Conjur"
-          #AUTH_URL="$CONJUR_URL/authn-jwt/$CONJUR_SERVICE_ID/$CONJUR_ACCOUNT/$CONJUR_HOST_ID/authenticate"
           AUTH_URL="$CONJUR_URL/authn-jwt/$CONJUR_SERVICE_ID/$CONJUR_ACCOUNT/authenticate"
           curl -sD - -X POST "$AUTH_URL" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Encoding: base64" -d "jwt=$GIT_TOKEN"
           SESSION_TOKEN=$(curl -sX POST "$AUTH_URL" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Encoding: base64" --data-urlencode "jwt=$GIT_TOKEN")
-          render "$SESSION_TOKEN"
 
           # Connect to the Conjur/Conjur REST API to retrieve secret value"
           SECRET_VALUE=$(curl -s --header "Authorization: Token token=\"$SESSION_TOKEN\"" "$CONJUR_URL/secrets/$CONJUR_ACCOUNT/variable/$SECRET_ID")
