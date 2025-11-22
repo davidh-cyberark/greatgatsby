@@ -26,8 +26,7 @@ jobs:
 
           echo "Authenticating to Conjur"
           AUTH_URL="$CONJUR_URL/authn-jwt/$CONJUR_SERVICE_ID/$CONJUR_ACCOUNT/authenticate"
-          curl -sD - -X POST "$AUTH_URL" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Encoding: base64" -d "jwt=$GIT_TOKEN"
-          SESSION_TOKEN=$(curl -sX POST "$AUTH_URL" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Encoding: base64" --data-urlencode "jwt=$GIT_TOKEN")
+          SESSION_TOKEN=$(curl -sX POST "$AUTH_URL" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Encoding: base64" -d "jwt=$GIT_TOKEN")
 
           # Connect to the Conjur/Conjur REST API to retrieve secret value"
           SECRET_VALUE=$(curl -s --header "Authorization: Token token=\"$SESSION_TOKEN\"" "$CONJUR_URL/secrets/$CONJUR_ACCOUNT/variable/$SECRET_ID")
