@@ -18,30 +18,23 @@ jobs:
         env:
           CONJUR_URL: "https://asb-pov.secretsmgr.cyberark.cloud/api"
           CONJUR_ACCOUNT: "conjur"
-          CONJUR_SERVICE_ID: "github-actions"
+          CONJUR_SERVICE_ID: "github"
         run: |
           set -x
+          render () { echo -n "$1" | while IFS= read -r -n1 char; do printf "One Character: %s\n" "$char"; done }
 
-          CONJUR_URL="https://asb-pov.secretsmgr.cyberark.cloud/api"
+          X_CONJUR_URL="https://asb-pov.secretsmgr.cyberark.cloud/api"
+          X_CONJUR_ACCOUNT="conjur"
+          X_CONJUR_SERVICE_ID="github"
           SECRET_ID="data%2Fvault%2Fasbdemo-azure-safe%2Fvm1%2Fpassword"
-          CONJUR_SERVICE_ID="github"
-          CONJUR_ACCOUNT="conjur"
-
-          render () {
-          string="$1"
-          while IFS= read -r -n1 char; do
-          printf "One Character: %s\n" "$char"
-          done <<< "$string"
-          }
+          CONJUR_HOST_ID="host%2Fdata%2F$APP_GROUP%2Fasbdemo-workload"
 
           echo "Retrieving JWT Token from Github"
           GIT_TOKEN=$(curl -s -H "Authorization:bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -r .value)
-          #render "$GIT_TOKEN"
 
           echo "Authenticating to Conjur"
-          curl -sD - -X POST "$CONJUR_URL/authn-jwt/$CONJUR_SERVICE_ID/$CONJUR_ACCOUNT/authenticate" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Encoding: base64" --data-urlencode "jwt=$GIT_TOKEN"
-
-          SESSION_TOKEN=$(curl -s -X POST "$CONJUR_URL/authn-jwt/$CONJUR_SERVICE_ID/$CONJUR_ACCOUNT/authenticate" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Encoding: base64" --data-urlencode "jwt=$GIT_TOKEN")
+          AUTH_URL="$CONJUR_URL/authn-jwt/$CONJUR_SERVICE_ID/$CONJUR_ACCOUNT/$CONJUR_HOST_ID/authenticate"
+          SESSION_TOKEN=$(curl -sX POST "$AUTH_URL" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept-Encoding: base64" --data-urlencode "jwt=$GIT_TOKEN")
           render "$SESSION_TOKEN"
 
           # Connect to the Conjur/Conjur REST API to retrieve secret value"
